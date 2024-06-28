@@ -1,1 +1,4 @@
 .env.local
+hmi_project
+pkg/advanced_chatbot.egg-info/
+pkg/advanced_chatbot/__pycache__/
