@@ -29,7 +29,7 @@
 A Singleton instance of `RagService` provides the following methods:
 
 ```python
-from advanced_chatbot.services.rag_services import RagService
+from advanced_chatbot.services.rag_service import RagService
 
 from pathlib import Path
 doc_path = Path("~/home/me/ai_chat/pkg/advanced_chatbot/data/livre_ux_digital_design_lab_1.pdf")
@@ -68,6 +68,20 @@ To enable mock models, in config.py
 ```python [config.py]
 USE_MOCK_MODELS = True
 ```
+
+
+## LOCAL LLM and EMBEDDING
+
+You can use local Llama3_8B with 4bit quantization (served by llamaCPP)
+and use bge embedding model.
+
+To enable local models, in config.py
+
+```python [config.py]
+USE_MOCK_MODELS = False
+USE_LOCAL_MODELS = True
+```
+
 
 
 ## Test DATA.

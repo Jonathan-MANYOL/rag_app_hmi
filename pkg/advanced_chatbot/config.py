@@ -15,4 +15,5 @@ DEFAULT_RAG_TOKEN_LIMIT = 2000
 
 #USE FAKE LLMS
 USE_MOCK_MODELS = False
+USE_LOCAL_MODELS = False # If true, use bge large for embedding, llama3_8b 4bit for generation
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")

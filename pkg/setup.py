@@ -4,6 +4,8 @@ requirements = """
 llama-index==0.10.8
 streamlit
 python-dotenv
+llama-index-embeddings-huggingface
+llama-index-llms-llama-cpp
 """
 
 setup(
@@ -17,3 +19,4 @@ setup(
     scripts=[],
     zip_safe=False,
 )
+

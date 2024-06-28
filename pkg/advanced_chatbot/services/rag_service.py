@@ -8,10 +8,11 @@ from pathlib import Path
 from typing import List
 from llama_index_client import ChatMessage, Document
 from llama_index.core import SimpleDirectoryReader
+import requests
 
 from advanced_chatbot.config import  (DATA_PATH, DEFAULT_RAG_CHUNK_OVERLAP, DEFAULT_RAG_CHUNK_SIZE,
                                      DEFAULT_RAG_SIMILARITY_TOP_K, DEFAULT_RAG_TOKEN_LIMIT, DEFAULT_RAG_WINDOW_SIZE, 
-                                     OPENAI_API_KEY, USE_MOCK_MODELS)
+                                     OPENAI_API_KEY, USE_LOCAL_MODELS, USE_MOCK_MODELS)
 
 from llama_index.core.llms import MockLLM
 from llama_index.core import MockEmbedding
@@ -36,6 +37,15 @@ from llama_index.core.chat_engine.types import (
 from llama_index.core.llms import ChatMessage, MessageRole
 from llama_index.core import ChatPromptTemplate
 import shutil
+from llama_index.llms.llama_cpp import LlamaCPP
+from llama_index.llms.llama_cpp.llama_utils import (
+    messages_to_prompt,
+    completion_to_prompt,
+)
+from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+
+
+
 
 
 DEFAULT_SYSTEM_PROMPT= """
@@ -80,7 +90,8 @@ Don't always with nothing but that short version of the language.
 
 RAG_STORAGE_PATH = DATA_PATH / "rag_storage"
 
-
+LLAMA_MODEL_PATH = DATA_PATH / "llama3_8b_4bit.gguf"
+LLAMA_DOWNLOAD_URL = "https://huggingface.co/PawanKrd/Meta-Llama-3-8B-Instruct-GGUF/resolve/main/llama-3-8b-instruct.Q4_K_M.gguf"
 class _RagService:
     """
     Service implement retrieval augmented generatoin primitives.
@@ -90,8 +101,6 @@ class _RagService:
         self.__init_llm_and_embedding()
         RAG_STORAGE_PATH.mkdir(parents=True, exist_ok=True)
         
-        
-        
     def __init_llm_and_embedding(self)-> None:
         """
         Initialize the language model and the embedding.
@@ -100,6 +109,37 @@ class _RagService:
         if USE_MOCK_MODELS:
             self._llm = MockLLM(max_tokens=256)
             self._embedding = MockEmbedding(embed_dim=1536)
+        elif USE_LOCAL_MODELS:
+            
+            if not LLAMA_MODEL_PATH.exists():
+                print("Downloading llama model")
+                response = requests.get(LLAMA_DOWNLOAD_URL, stream=True)
+                # Check if the request was successful
+                if response.status_code == 200:
+                    # Open a local file with write-binary mode
+                    with open(str(LLAMA_MODEL_PATH), 'wb') as file:
+                        # Write the content of the response to the file
+                        for chunk in response.iter_content(chunk_size=8192):
+                            file.write(chunk)
+                    print(f"File '{LLAMA_MODEL_PATH}' downloaded successfully.")
+                else:
+                    print(f"Failed to download file. HTTP Status Code: {response.status_code}")
+            
+            self.llm = LlamaCPP(
+                model_path=LLAMA_MODEL_PATH,
+                temperature=0.1,
+                max_new_tokens=256,
+                context_window=3000,
+                # kwargs to pass to __call__()
+                generate_kwargs={"stop_sequence": 
+                    ["</s>"]},
+                messages_to_prompt=messages_to_prompt,
+                completion_to_prompt=completion_to_prompt,
+                verbose=True,
+                
+            )
+            
+            self.embedding =HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
         else:
             self._llm = OpenAI(api_key=OPENAI_API_KEY,model="gpt-3.5-turbo")
             self._embedding = OpenAIEmbedding(api_key=OPENAI_API_KEY, model="text-embedding-3-small")
