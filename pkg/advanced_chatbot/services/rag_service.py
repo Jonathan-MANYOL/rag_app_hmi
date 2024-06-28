@@ -131,8 +131,7 @@ class _RagService:
                 max_new_tokens=256,
                 context_window=3000,
                 # kwargs to pass to __call__()
-                generate_kwargs={"stop_sequence": 
-                    ["</s>"]},
+                generate_kwargs={"stop_sequences": ["</s>"]},
                 messages_to_prompt=messages_to_prompt,
                 completion_to_prompt=completion_to_prompt,
                 verbose=True,
