@@ -14,6 +14,6 @@ DEFAULT_RAG_TOKEN_LIMIT = 2000
 
 
 #USE FAKE LLMS
-USE_MOCK_MODELS = True 
-USE_LOCAL_MODELS = False # If true (and mock model_disabled), llm=llama7b, embedding=bge_large.
+USE_MOCK_MODELS = False #True 
+USE_LOCAL_MODELS = True #False # If true (and mock model_disabled), llm=llama7b, embedding=bge_large.
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY") 
