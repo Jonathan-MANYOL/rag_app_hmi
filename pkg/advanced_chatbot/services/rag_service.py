@@ -106,9 +106,10 @@ class _RagService:
         Initialize the language model and the embedding.
         """
         
-        if USE_MOCK_MODELS:
+        if USE_MOCK_MODELS ==True:
             self._llm = MockLLM(max_tokens=256)
             self._embedding = MockEmbedding(embed_dim=1536)
+            print(f"⚠️ Mock model is being used!")
         elif USE_LOCAL_MODELS:
             
             if not LLAMA_MODEL_PATH.exists():
@@ -126,7 +127,7 @@ class _RagService:
                     print(f"Failed to download file. HTTP Status Code: {response.status_code}")
             
             self.llm = LlamaCPP(
-                model_path=LLAMA_MODEL_PATH,
+                model_path=str(LLAMA_MODEL_PATH),
                 temperature=0.1,
                 max_new_tokens=256,
                 context_window=3000,
@@ -140,8 +141,9 @@ class _RagService:
             
             self.embedding =HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
         else:
-            self._llm = OpenAI(api_key=OPENAI_API_KEY,model="gpt-3.5-turbo")
-            self._embedding = OpenAIEmbedding(api_key=OPENAI_API_KEY, model="text-embedding-3-small")
+            if OPENAI_API_KEY != None:
+                self._llm = OpenAI(api_key=OPENAI_API_KEY,model="gpt-3.5-turbo")
+                self._embedding = OpenAIEmbedding(api_key=OPENAI_API_KEY, model="text-embedding-3-small")
         
 
         
@@ -215,8 +217,7 @@ class _RagService:
         
         #4. Create the index
         index = VectorStoreIndex(
-            nodes=
-            nodes,
+            nodes= nodes,
             storage_context=storage_context,
             embed_model=self._embedding,
             show_progress=True,
