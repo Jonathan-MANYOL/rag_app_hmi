@@ -10,7 +10,7 @@ from llama_index_client import ChatMessage, Document
 from llama_index.core import SimpleDirectoryReader
 import requests
 
-from advanced_chatbot.config import  (DATA_PATH, DEFAULT_RAG_CHUNK_OVERLAP, DEFAULT_RAG_CHUNK_SIZE,
+from advanced_chatbot.config import  (DATA_PATH, UPLOAD_DATA_PATH, DEFAULT_RAG_CHUNK_OVERLAP, DEFAULT_RAG_CHUNK_SIZE,
                                      DEFAULT_RAG_SIMILARITY_TOP_K, DEFAULT_RAG_TOKEN_LIMIT, DEFAULT_RAG_WINDOW_SIZE, 
                                      OPENAI_API_KEY, USE_LOCAL_MODELS, USE_MOCK_MODELS)
 
@@ -379,11 +379,10 @@ class _RagService:
         index_dir = self.__get_index_persist_dir(index_id)
         with open(index_dir / "index_config.json", "r") as f:
             index_config = json.load(f)
-            document_path = index_config["document_path"]
-        
-        
+            document_path = UPLOAD_DATA_PATH / index_config["document_path"]
+        # print(document_path)
         #2. Load the document
-        document_list = self.parse_document(document_path)
+        document_list = self.parse_document(document_path)#(Path(document_path))
         #First page
         first_page_document = [k for k in document_list if k.page_label == '1']
         first_page_content = first_page_document[0].text
